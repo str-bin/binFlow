@@ -9,25 +9,6 @@ import { getNodeIconSVG } from '@/shared/utils'
 export const useD3Drop = (isDark: boolean) => {
   const { addNode, selectNode, setPropertyEditing, startConnection } = useCanvasStore()
 
-  // 获取节点颜色
-  const getNodeColor = (nodeType: NodeType): string => {
-    switch (nodeType) {
-      case NodeType.ADDRESS:
-        return 'hsl(217 91% 60%)' // blue-500
-      case NodeType.ENTITY:
-        return 'hsl(262 83% 58%)' // purple-500
-      case NodeType.PROJECT:
-        return 'hsl(32 95% 44%)' // orange-600
-      default:
-        return 'hsl(var(--muted-foreground))'
-    }
-  }
-
-  // 获取节点图标 - 使用共享的SVG图标
-  const getNodeIcon = (nodeType: NodeType) => {
-    return getNodeIconSVG(nodeType)
-  }
-
   const handleDrop = useCallback((event: React.DragEvent, svgRef: React.RefObject<SVGSVGElement>) => {
     event.preventDefault()
     
@@ -36,6 +17,25 @@ export const useD3Drop = (isDark: boolean) => {
     console.log('Event target:', event.target)
     console.log('Event currentTarget:', event.currentTarget)
     console.log('DataTransfer types:', event.dataTransfer.types)
+    
+    // 获取节点颜色
+    const getNodeColor = (nodeType: NodeType): string => {
+      switch (nodeType) {
+        case NodeType.ADDRESS:
+          return 'hsl(217 91% 60%)' // blue-500
+        case NodeType.ENTITY:
+          return 'hsl(262 83% 58%)' // purple-500
+        case NodeType.PROJECT:
+          return 'hsl(32 95% 44%)' // orange-600
+        default:
+          return 'hsl(var(--muted-foreground))'
+      }
+    }
+
+    // 获取节点图标 - 使用共享的SVG图标
+    const getNodeIcon = (nodeType: NodeType) => {
+      return getNodeIconSVG(nodeType)
+    }
     
     try {
       const data = JSON.parse(event.dataTransfer.getData('application/json'))

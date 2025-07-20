@@ -11,8 +11,8 @@ import { useTheme } from '@/providers/theme-provider'
 import { useD3Layout } from '@/shared/hooks'
 import { useD3Drag, useD3Drop, useD3Keyboard, useD3Theme } from '../hooks'
 import { prepareD3Data, createBackgroundGrid, createArrowMarkers, formatNodeLabel, processLinkData, getLinkSource, getLinkTarget } from '@/shared/utils'
-import D3LayoutPanel from './D3LayoutPanel'
-import LeftToolbar from '@/features/workspace/widgets/LeftToolbar'
+import TopRightPanel from './TopRightPanel'
+import TopStatsBar from './TopStatsBar'
 import ConnectionPreview from './ConnectionPreview'
 import { NodeType, EdgeType } from '@/shared/types'
 
@@ -233,6 +233,17 @@ const D3Canvas: React.FC = () => {
         if (data.type === 'edgeType') {
           // 开始连线创建
           startConnection(d.id, data.edgeType)
+        } else if (data.type === 'node') {
+          // 在画布上添加新节点
+          const svgNode = svg.node()
+          if (svgNode) {
+            const point = d3.pointer(event, svgNode)
+            const transform = d3.zoomTransform(svgNode)
+            const [x, y] = transform.invert(point)
+            
+            // 这里可以添加创建新节点的逻辑
+            console.log('Adding new node at:', { x, y, type: data.nodeType })
+          }
         }
       } catch (error) {
         console.error('Error handling node drop:', error)
@@ -318,24 +329,28 @@ const D3Canvas: React.FC = () => {
       }
     })
 
+    // 处理画布拖拽悬停事件
+    svg.on('dragover', (event: any) => {
+      event.preventDefault()
+      event.dataTransfer.dropEffect = 'copy'
+    })
+
     return () => {
       if (simulationRef.current) {
         simulationRef.current.stop()
       }
     }
-  }, [nodes, edges, selectedNodes, selectedEdges, isDark, handleDrag, selectEdge, clearSelection, themeUtils, startConnection, finishConnection, cancelConnection, selectNode])
+  }, [nodes, edges, selectedNodes, selectedEdges, isDark, handleDrag, handleDrop, selectEdge, clearSelection, themeUtils, startConnection, finishConnection, cancelConnection, selectNode])
 
   return (
     <div className="relative w-full h-full bg-background">
-      {/* 顶部工具栏 */}
-      <div className="absolute top-4 left-4 z-10">
-        <LeftToolbar />
-      </div>
+      {/* 顶部统计栏 */}
+      <TopStatsBar />
       
-      {/* 布局面板 */}
+      {/* 右上角面板 */}
       {showLayoutPanel && (
         <div className="absolute top-4 right-4 z-10">
-          <D3LayoutPanel
+          <TopRightPanel
             settings={settings}
             onSettingChange={updateSetting}
             onRestart={() => {
