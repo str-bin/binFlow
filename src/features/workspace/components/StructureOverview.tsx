@@ -191,14 +191,10 @@ function getNodeTypeLabel(type: NodeType): string {
   switch (type) {
     case NodeType.ADDRESS:
       return '地址'
-    case NodeType.TRANSACTION:
-      return '交易'
     case NodeType.ENTITY:
       return '实体'
     case NodeType.PROJECT:
       return '项目'
-    case NodeType.TAG:
-      return '标签'
     default:
       return type
   }

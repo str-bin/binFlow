@@ -274,14 +274,10 @@ function getDefaultNodeColor(nodeType: NodeType): string {
   switch (nodeType) {
     case NodeType.ADDRESS:
       return 'hsl(217 91% 60%)' // blue-500
-    case NodeType.TRANSACTION:
-      return 'hsl(142 71% 45%)' // green-600
     case NodeType.ENTITY:
       return 'hsl(262 83% 58%)' // purple-500
     case NodeType.PROJECT:
       return 'hsl(32 95% 44%)' // orange-600
-    case NodeType.TAG:
-      return 'hsl(322 66% 68%)' // pink-400
     default:
       return 'hsl(var(--muted-foreground))'
   }

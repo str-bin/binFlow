@@ -156,7 +156,7 @@ function createEdgeDragPreview(edgeType: EdgeType): HTMLElement {
 const EdgeLibrary: React.FC = () => {
   const handleDragStart = (event: React.DragEvent, edgeType: EdgeType) => {
     event.dataTransfer.setData('application/json', JSON.stringify({
-      type: 'edge',
+      type: 'edgeType',
       edgeType
     }))
     

@@ -4,7 +4,7 @@ import { D3NodeData } from '@/shared/types'
 import { useCanvasStore } from '@/store'
 
 export const useD3Drag = (onDragUpdate?: () => void) => {
-  const { selectNode, setPropertyEditing, updateNode } = useCanvasStore()
+  const { selectNode, setPropertyEditing, updateNode, connectionState } = useCanvasStore()
 
   const handleDrag = useCallback((simulation: d3.Simulation<D3NodeData, any> | null) => {
     function dragStarted(event: d3.D3DragEvent<SVGGElement, D3NodeData, D3NodeData>, d: D3NodeData) {
@@ -12,8 +12,11 @@ export const useD3Drag = (onDragUpdate?: () => void) => {
         simulation.alphaTarget(0.3).restart()
       }
       
-      selectNode(d.id)
-      setPropertyEditing(true)
+      // 在连线创建模式下，不执行选择节点和属性编辑操作
+      if (!connectionState.isCreating) {
+        selectNode(d.id)
+        setPropertyEditing(true)
+      }
     }
 
     function dragged(event: d3.D3DragEvent<SVGGElement, D3NodeData, D3NodeData>, d: D3NodeData) {

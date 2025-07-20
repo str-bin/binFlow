@@ -1,5 +1,21 @@
 import { create } from 'zustand'
-import { D3NodeData, D3LinkData, D3CanvasState } from '@/shared/types'
+import { D3NodeData, D3LinkData, D3CanvasState, EdgeType } from '@/shared/types'
+
+// 获取连线颜色
+const getEdgeColor = (edgeType: EdgeType): string => {
+  switch (edgeType) {
+    case EdgeType.TRANSACTION:
+      return '#10b981'
+    case EdgeType.OWNERSHIP:
+      return '#3b82f6'
+    case EdgeType.RELATION:
+      return '#8b5cf6'
+    case EdgeType.FLOW:
+      return '#f59e0b'
+    default:
+      return '#6b7280'
+  }
+}
 
 interface CanvasStore extends D3CanvasState {
   // 面板宽度
@@ -9,6 +25,18 @@ interface CanvasStore extends D3CanvasState {
   // 属性编辑模式
   isPropertyEditing: boolean
   setPropertyEditing: (editing: boolean) => void
+  
+  // 连线创建状态
+  connectionState: {
+    isCreating: boolean
+    sourceNodeId: string | null
+    edgeType: EdgeType | null
+    mousePosition: { x: number; y: number } | null
+  }
+  startConnection: (sourceNodeId: string, edgeType: EdgeType) => void
+  updateConnectionMousePosition: (position: { x: number; y: number }) => void
+  finishConnection: (targetNodeId: string) => void
+  cancelConnection: () => void
   
   // 节点操作
   addNode: (node: D3NodeData) => void
@@ -66,6 +94,101 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   isPropertyEditing: false,
   setPropertyEditing: (editing) => {
     set({ isPropertyEditing: editing })
+  },
+  
+  // 连线创建状态
+  connectionState: {
+    isCreating: false,
+    sourceNodeId: null,
+    edgeType: null,
+    mousePosition: null
+  },
+  startConnection: (sourceNodeId, edgeType) => {
+    console.log('startConnection called:', { sourceNodeId, edgeType })
+    set((state) => ({
+      connectionState: {
+        isCreating: true,
+        sourceNodeId,
+        edgeType,
+        mousePosition: null
+      }
+    }))
+    console.log('Connection started successfully')
+  },
+  updateConnectionMousePosition: (position) => {
+    set((state) => ({
+      connectionState: {
+        ...state.connectionState,
+        mousePosition: position
+      }
+    }))
+  },
+  finishConnection: (targetNodeId) => {
+    console.log('finishConnection called with targetNodeId:', targetNodeId)
+    const state = get()
+    const { connectionState } = state
+    
+    console.log('Current connection state:', connectionState)
+    
+    if (connectionState.isCreating && connectionState.sourceNodeId && connectionState.edgeType) {
+      const sourceNode = state.nodes.find(node => node.id === connectionState.sourceNodeId)
+      const targetNode = state.nodes.find(node => node.id === targetNodeId)
+      
+      console.log('Source node:', sourceNode)
+      console.log('Target node:', targetNode)
+      
+      if (sourceNode && targetNode && sourceNode.id !== targetNode.id) {
+        const newEdge: D3LinkData = {
+          id: `edge-${Date.now()}-${Math.random()}`,
+          source: sourceNode.id,
+          target: targetNode.id,
+          edgeType: connectionState.edgeType,
+          value: '',
+          direction: 'outgoing',
+          attributes: {},
+          metadata: {
+            createdAt: new Date().toISOString(),
+            source: 'manual'
+          },
+          visual: {
+            color: getEdgeColor(connectionState.edgeType),
+            width: 2,
+            opacity: 1,
+            arrowSize: 6
+          },
+          selected: false,
+          hovered: false
+        }
+        
+        console.log('Creating new edge:', newEdge)
+        
+        set((state) => ({
+          edges: [...state.edges, newEdge],
+          connectionState: {
+            isCreating: false,
+            sourceNodeId: null,
+            edgeType: null,
+            mousePosition: null
+          }
+        }))
+        
+        console.log('Edge created successfully')
+      } else {
+        console.log('Invalid connection: source or target not found, or same node')
+      }
+    } else {
+      console.log('Connection state invalid:', connectionState)
+    }
+  },
+  cancelConnection: () => {
+    set((state) => ({
+      connectionState: {
+        isCreating: false,
+        sourceNodeId: null,
+        edgeType: null,
+        mousePosition: null
+      }
+    }))
   },
   
   // 节点操作

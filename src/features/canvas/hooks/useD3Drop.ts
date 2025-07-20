@@ -1,13 +1,13 @@
 import { useCallback } from 'react'
 import * as d3 from 'd3'
 import { v4 as uuidv4 } from 'uuid'
-import { NodeType, D3NodeData } from '@/shared/types'
+import { NodeType, D3NodeData, EdgeType } from '@/shared/types'
 import { ChainType, AddressLabelType } from '@/shared/types/address'
 import { useCanvasStore } from '@/store'
 import { getNodeIconSVG } from '@/shared/utils'
 
 export const useD3Drop = (isDark: boolean) => {
-  const { addNode, selectNode, setPropertyEditing } = useCanvasStore()
+  const { addNode, selectNode, setPropertyEditing, startConnection } = useCanvasStore()
 
   // 获取节点颜色
   const getNodeColor = (nodeType: NodeType): string => {
@@ -136,11 +136,14 @@ export const useD3Drop = (isDark: boolean) => {
             setPropertyEditing(true)
           }, 100)
         }
+      } else if (data.type === 'edgeType') {
+        console.log('Edge type dropped, but should be handled by node drop events')
+        // 连线类型的拖拽应该由节点的事件处理，这里只是防止错误
       }
     } catch (error) {
       console.error('Error handling drop:', error)
     }
-  }, [addNode, selectNode, setPropertyEditing, isDark])
+  }, [addNode, selectNode, setPropertyEditing, startConnection, isDark])
 
   return { handleDrop }
 } 
